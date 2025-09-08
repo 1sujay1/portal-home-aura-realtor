@@ -72,6 +72,9 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (userData) => {
+    if(userData.password.length<6){
+      return { success: false, error: 'Password must be at least 6 characters long' };
+    }
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',

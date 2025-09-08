@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const paymentIntentSchema = new mongoose.Schema({
   transactionId: { type: String, required: true },
@@ -126,15 +127,6 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Please provide your name'],
     trim: true
   },
-  subscription: {
-    type: subscriptionSchema,
-    default: null
-  },
-  paymentIntents: [paymentIntentSchema],
-  subscriptionHistory: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'SubscriptionHistory'
-  }],
   email: {
     type: String,
     required: [true, 'Please provide your email'],
@@ -164,8 +156,15 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
-  subscription: subscriptionSchema,
+  subscription: {
+    type: subscriptionSchema,
+    default: null
+  },
   paymentIntents: [paymentIntentSchema],
+  subscriptionHistory: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'SubscriptionHistory'
+  }],
   createdAt: {
     type: Date,
     default: Date.now
@@ -185,6 +184,10 @@ const userSchema = new mongoose.Schema({
 
 // Add methods to user schema
 userSchema.methods = {
+  async comparePassword(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+  },
+  
   hasActiveSubscription() {
     return this.subscription && this.subscription.isActive();
   },
@@ -287,6 +290,7 @@ function getPlanDetails(planId) {
   };
   return plans[planId];
 }
+
 
 userSchema.pre('save', async function(next) {
   if (this.isModified('password')) {

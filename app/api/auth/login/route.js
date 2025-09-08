@@ -26,8 +26,8 @@ export async function POST(request) {
         { status: 401 }
       );
     }
-
-    // Verify password
+// console.log("user",user)
+    // Verify password using bcrypt.compare
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return NextResponse.json(

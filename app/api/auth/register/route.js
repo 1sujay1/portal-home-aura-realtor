@@ -29,11 +29,7 @@ export async function POST(request) {
       );
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
+    // Create user (password will be hashed by the pre-save hook)
     const user = await User.create({
       name,
       email: lowercaseEmail,
@@ -41,7 +37,7 @@ export async function POST(request) {
         primary: phone.primary,
         secondary: phone.secondary || ''
       },
-      password: hashedPassword,
+      password: password, // Don't hash here - let the pre-save hook handle it
       role: 'user'
     });
 
